@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+slint = "1.5"
+rusqlite = { version = "0.31", features = ["bundled"] }
+arboard = "3.4"
+clipboard-master = "4.0"
+
+[build-dependencies]
+slint-build = "1.5"

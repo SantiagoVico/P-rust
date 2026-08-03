@@ -1,6 +1,5 @@
 use rusqlite::{Connection, Result};
 
-// Base structure for the database connection
 #[derive(Debug, Clone)]
 pub struct ClipboardItem {
     pub id: i32,
@@ -12,10 +11,8 @@ pub struct ClipboardItem {
 }
 
 pub fn init_db() -> Result<Connection> {
-    // Create or open the SQLite database file
     let conn = Connection::open("clipboard_history.db")?;
 
-    // Create the table with the schema we had validated
     conn.execute(
         "CREATE TABLE IF NOT EXISTS clipboard_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +23,7 @@ pub fn init_db() -> Result<Connection> {
             is_pinned BOOLEAN DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )",
-        [], // No dynamic parameters here
+        [],
     )?;
 
     Ok(conn)
@@ -45,4 +42,22 @@ pub fn insert_item(conn: &Connection, item: &ClipboardItem) -> Result<()> {
         ),
     )?;
     Ok(())
+}
+
+pub fn get_recent_texts(conn: &Connection, limit: u32) -> Result<Vec<String>> {
+    let mut stmt = conn.prepare(
+        "SELECT content FROM clipboard_history 
+         WHERE content_type = 'text' AND content IS NOT NULL 
+         ORDER BY created_at DESC 
+         LIMIT ?1"
+    )?;
+    
+    let rows = stmt.query_map([limit], |row| row.get(0))?;
+    
+    let mut items = Vec::new();
+    for item in rows {
+        items.push(item?);
+    }
+    
+    Ok(items)
 }

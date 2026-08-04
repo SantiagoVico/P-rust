@@ -1,0 +1,46 @@
+// ui/search_bar.slint
+
+export component SearchBar inherits Rectangle {
+    // Expose le texte tapé au composant parent
+    out property <string> search-query <=> search-input.text;
+    
+    height: 45px;
+    background: #2a2a3599; 
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: search-input.has-focus ? #4a90e2aa : #ffffff10;
+    
+    animate border-color { duration: 150ms; }
+    
+    HorizontalLayout {
+        padding-left: 15px;
+        padding-right: 15px;
+        spacing: 12px;
+        alignment: start;
+        
+        Text {
+            text: "🔍";
+            font-size: 16px;
+            vertical-alignment: center;
+        }
+        
+        Rectangle {
+            Text {
+                text: "Rechercher dans l'historique...";
+                color: #a0a0b0;
+                font-size: 14px;
+                vertical-alignment: center;
+                visible: search-input.text == ""; 
+            }
+            
+            search-input := TextInput {
+                width: 100%;
+                height: 100%;
+                vertical-alignment: center;
+                color: #e2e2e2;
+                font-size: 14px;
+                single-line: true;
+            }
+        }
+    }
+}

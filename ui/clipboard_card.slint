@@ -1,0 +1,126 @@
+// ui/clipboard_card.slint
+
+export component ClipboardCard inherits Rectangle {
+    in property <string> text-content;
+    
+    callback on-copy();
+    callback on-edit();
+    callback on-delete();
+    callback on-pin(); 
+    
+    property <bool> expanded: false;
+    property <bool> is-long: text-node.preferred-height > 60px;
+    property <bool> menu-open: false; 
+    
+    background: #2a2a3599;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: #ffffff10;
+    
+    VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+        
+        Rectangle {
+            clip: true; 
+            height: (root.is-long && !root.expanded) ? 60px : text-node.preferred-height;
+            
+            text-node := Text {
+                width: 100%;
+                height: self.preferred-height;
+                text: root.text-content;
+                color: #e2e2e2;
+                font-size: 14px;
+                wrap: word-wrap;
+                vertical-alignment: top;
+            }
+        }
+        
+        HorizontalLayout {
+            alignment: space-between;
+            
+            HorizontalLayout {
+                Rectangle {
+                    visible: root.is-long;
+                    width: 80px;
+                    height: 32px;
+                    background: touch-expand.has-hover ? #ffffff22 : transparent;
+                    border-radius: 6px;
+                    
+                    Text {
+                        text: root.expanded ? "Voir moins ▲" : "Voir plus ▼";
+                        color: #a0a0b0;
+                        font-size: 12px;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                    }
+                    touch-expand := TouchArea {
+                        clicked => { root.expanded = !root.expanded; }
+                    }
+                }
+            }
+            
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: end;
+                
+                HorizontalLayout {
+                    visible: root.menu-open; 
+                    spacing: 8px;
+                    
+                    Rectangle {
+                        background: touch-edit.has-hover ? #e2a04aaa : #e2a04a55;
+                        border-radius: 8px;
+                        width: 32px; height: 32px;
+                        Text { text: "✎"; font-size: 18px; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                        touch-edit := TouchArea { 
+                            clicked => { 
+                                root.on-edit(); 
+                                root.menu-open = false; 
+                            } 
+                        }
+                    }
+                    
+                    Rectangle {
+                        background: touch-delete.has-hover ? #e24a4aaa : #e24a4a55;
+                        border-radius: 8px;
+                        width: 32px; height: 32px;
+                        Text { text: "✖"; font-size: 14px; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                        touch-delete := TouchArea { 
+                            clicked => { 
+                                root.on-delete(); 
+                                root.menu-open = false; 
+                            } 
+                        }
+                    }
+                }
+                
+                Rectangle {
+                    background: touch-pin.has-hover ? #4ae290aa : #4ae29055; 
+                    border-radius: 8px;
+                    width: 32px; height: 32px;
+                    Text { text: "📌"; font-size: 16px; horizontal-alignment: center; vertical-alignment: center; }
+                    touch-pin := TouchArea { clicked => { root.on-pin(); } }
+                }
+                
+                Rectangle {
+                    background: touch-copy.has-hover ? #4a90e2aa : #4a90e255; 
+                    border-radius: 8px;
+                    width: 32px; height: 32px;
+                    Text { text: "📋"; font-size: 16px; horizontal-alignment: center; vertical-alignment: center; }
+                    touch-copy := TouchArea { clicked => { root.on-copy(); } }
+                }
+                
+                Rectangle {
+                    background: touch-burger.has-hover ? #ffffff22 : transparent;
+                    border-radius: 8px;
+                    width: 32px; height: 32px;
+                    Text { text: "⋮"; font-size: 20px; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                    touch-burger := TouchArea { 
+                        clicked => { root.menu-open = !root.menu-open; } 
+                    }
+                }
+            }
+        }
+    }
+}

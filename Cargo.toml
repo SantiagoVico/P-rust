@@ -5,9 +5,10 @@ edition = "2024"
 
 [dependencies]
 slint = "1.5"
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.31.0", features = ["bundled"] }
 arboard = "3.4"
 clipboard-master = "4.0"
+rdev = "0.5"
 
 [build-dependencies]
 slint-build = "1.5"

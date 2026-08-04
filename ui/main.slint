@@ -1,32 +1,47 @@
+// ui/main.slint
+
 import { ScrollView } from "std-widgets.slint";
+// Importation de tes nouveaux composants
+import { ClipboardCard } from "clipboard_card.slint";
+import { SearchBar } from "search_bar.slint";
 
 export component AppWindow inherits Window {
-    width: 400px;
-    height: 600px;
-    title: "Paste Clone";
-    background: #1e1e1e;
+    preferred-width: 450px;
+    preferred-height: 650px;
+    title: "P-Rust";
+    
+    background: @radial-gradient(circle, #352538 0%, #15151a 80%, #0d0d12 100%);
     
     in property <[string]> history;
     
-    ScrollView {
-        VerticalLayout {
-            padding: 10px;
-            spacing: 10px;
-            alignment: start;
-            
-            for item in root.history : Rectangle {
-                background: #2a2a2a;
-                border-radius: 8px;
+    // Fait le pont entre la barre de recherche enfant et le code Rust parent
+    out property <string> search-query <=> search-bar.search-query;
+    
+    callback copy-item(string);
+    callback delete-item(int);
+    callback edit-item(int, string);
+    callback pin-item(int); 
+    
+    VerticalLayout {
+        padding: 20px;
+        spacing: 15px;
+        
+        // Utilisation du composant SearchBar
+        search-bar := SearchBar {}
+
+        ScrollView {
+            VerticalLayout {
+                spacing: 15px;
+                alignment: start;
                 
-                VerticalLayout {
-                    padding: 15px;
+                // Utilisation du composant ClipboardCard
+                for item[index] in root.history : ClipboardCard {
+                    text-content: item;
                     
-                    Text {
-                        text: item;
-                        color: white;
-                        font-size: 14px;
-                        wrap: word-wrap;
-                    }
+                    on-copy => { root.copy-item(item); }
+                    on-edit => { root.edit-item(index, item); }
+                    on-delete => { root.delete-item(index); }
+                    on-pin => { root.pin-item(index); }
                 }
             }
         }

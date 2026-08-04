@@ -1,5 +1,3 @@
-// ui/main.slint
-
 import { ScrollView } from "std-widgets.slint";
 import { ClipboardCard } from "clipboard_card.slint";
 import { SearchBar } from "search_bar.slint";
@@ -15,8 +13,6 @@ export component AppWindow inherits Window {
     
     callback copy-item(string);
     callback delete-item(int, string);
-    callback edit-item(int, string);
-    callback pin-item(int); 
     callback search-changed(string); 
     
     VerticalLayout {
@@ -38,9 +34,7 @@ export component AppWindow inherits Window {
                     text-content: item;
                     
                     on-copy => { root.copy-item(item); }
-                    on-edit => { root.edit-item(index, item); }
                     on-delete => { root.delete-item(index, item); }
-                    on-pin => { root.pin-item(index); }
                 }
             }
         }

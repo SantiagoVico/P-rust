@@ -1,9 +1,11 @@
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::time::Duration;
-use rusqlite::Connection;
-use slint::{ModelRc, SharedString, VecModel, Weak};
+use std::io::Write;
 use std::rc::Rc;
 
+use slint::{ModelRc, SharedString, VecModel, Weak};
+
+use rusqlite::Connection;
 use crate::db::{self, ClipboardItem};
 use crate::AppWindow;
 
@@ -49,4 +51,16 @@ pub fn start_listening(ui_handle: Weak<AppWindow>) {
             std::thread::sleep(Duration::from_millis(500));
         }
     });
+}
+
+pub fn write_text(text: String) {
+    if let Ok(mut child) = Command::new("wl-copy")
+        .stdin(Stdio::piped())
+        .spawn() 
+    {
+        if let Some(mut stdin) = child.stdin.take() {
+            let _ = stdin.write_all(text.as_bytes());
+        }
+    }
+    println!("Texte copié dans le presse-papier (Wayland).");
 }

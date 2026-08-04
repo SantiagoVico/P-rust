@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, Result, OptionalExtension}; // Ajout de OptionalExtension ici
 
 #[derive(Debug, Clone)]
 pub struct ClipboardItem {
@@ -30,6 +30,25 @@ pub fn init_db() -> Result<Connection> {
 }
 
 pub fn insert_item(conn: &Connection, item: &ClipboardItem) -> Result<()> {
+    // Check si le contenu existe déjà dans la base de données pour éviter les doublons
+    if item.content_type == "text" {
+        if let Some(ref text_content) = item.content {
+            let mut stmt = conn.prepare("SELECT id FROM clipboard_history WHERE content = ?1 AND content_type = 'text'")?;
+            
+            let existing_id: Option<i32> = stmt.query_row([text_content], |row| row.get(0)).optional()?;
+
+            if let Some(id) = existing_id {
+                // Si le texte existe déjà, on met à jour la date de création pour le rafraîchir
+                conn.execute(
+                    "UPDATE clipboard_history SET created_at = CURRENT_TIMESTAMP WHERE id = ?1",
+                    [id],
+                )?;
+                return Ok(());
+            }
+        }
+    }
+
+    // Nouveau texte ou un autre type de contenu (image, etc.), on l'insère dans la base de données
     conn.execute(
         "INSERT INTO clipboard_history (content_type, content, media_path, source_app, is_pinned)
          VALUES (?1, ?2, ?3, ?4, ?5)",

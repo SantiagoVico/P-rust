@@ -8,6 +8,9 @@ use crate::AppWindow;
 use clipboard_master::{CallbackResult, ClipboardHandler, Master};
 use arboard::Clipboard;
 
+use std::process::{Command, Stdio};
+use std::io::Write;
+
 pub fn start_listening(ui_handle: Weak<AppWindow>) {
     struct ClipboardListener {
         ui: Weak<AppWindow>,
@@ -58,4 +61,16 @@ pub fn start_listening(ui_handle: Weak<AppWindow>) {
         let mut master = Master::new(ClipboardListener { ui: ui_handle }).unwrap();
         master.run().unwrap();
     });
+}
+
+pub fn write_text(text: String) {
+    if let Ok(mut child) = Command::new("pbcopy")
+        .stdin(Stdio::piped())
+        .spawn() 
+    {
+        if let Some(mut stdin) = child.stdin.take() {
+            let _ = stdin.write_all(text.as_bytes());
+        }
+    }
+    println!("Texte copié dans le presse-papier (macOS).");
 }

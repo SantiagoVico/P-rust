@@ -8,6 +8,7 @@ mod clipboard;
 mod window;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialisation de la base de données
     let conn = db::init_db().expect("Échec de l'initialisation de la base de données");
     let ui = AppWindow::new()?;
 
@@ -22,7 +23,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // Configuration de la fenêtre et des comportements spécifiques à l'OS
     window::setup_window_behavior(&ui, ui.as_weak());
+
+    // Connexion des signaux de l'interface utilisateur aux actions appropriées
+    ui.on_copy_item({
+        move |text| {
+            clipboard::write_text(text.to_string());
+        }
+    });
     
+    // Démarrage de l'interface utilisateur
     ui.run()?;
     Ok(())
 }

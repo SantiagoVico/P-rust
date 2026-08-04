@@ -15,11 +15,27 @@ jobs:
       - name: 🦀 Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: 🚀 Build release binary
-        run: cargo build --release
+      - name: 🛠️ Install cargo-bundle
+        run: cargo install cargo-bundle
+
+      - name: 🚀 Build and Bundle for macOS
+        run: |
+          # 1. Compilation de l'interface graphique
+          cargo build --release --bin p-rust-ui
+          
+          # 2. Création du bundle .app pour le daemon
+          cargo bundle --release --bin p-rust
+          
+          # 3. Copie de l'interface graphique dans le paquet de l'application
+          cp target/release/p-rust-ui "target/release/bundle/osx/Paste Clone.app/Contents/MacOS/"
+
+      - name: 🗜️ Zip the Application
+        run: |
+          cd target/release/bundle/osx/
+          zip -r PasteClone-macOS.zip "Paste Clone.app"
 
       - name: 📤 Upload macOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: p-rust-macos
-          path: target/release/p-rust
+          name: p-rust-macos-app
+          path: target/release/bundle/osx/PasteClone-macOS.zip

@@ -11,7 +11,12 @@ pub struct ClipboardItem {
 }
 
 pub fn init_db() -> Result<Connection> {
-    let conn = Connection::open("clipboard_history.db")?;
+    let mut db_dir = dirs::config_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+    db_dir.push("p-rust");
+    std::fs::create_dir_all(&db_dir).ok();
+
+    let db_path = db_dir.join("clipboard_history.db");
+    let conn = Connection::open(db_path)?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS clipboard_history (

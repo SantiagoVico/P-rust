@@ -80,3 +80,11 @@ pub fn get_recent_texts(conn: &Connection, limit: u32) -> Result<Vec<String>> {
     
     Ok(items)
 }
+
+pub fn delete_item(conn: &Connection, content: &str) -> Result<()> {
+    conn.execute(
+        "DELETE FROM clipboard_history WHERE content = ?1 AND content_type = 'text'",
+        [content],
+    )?;
+    Ok(())
+}

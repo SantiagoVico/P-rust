@@ -18,7 +18,7 @@ export component AppWindow inherits Window {
     out property <string> search-query <=> search-bar.search-query;
     
     callback copy-item(string);
-    callback delete-item(int);
+    callback delete-item(int, string);
     callback edit-item(int, string);
     callback pin-item(int); 
     
@@ -40,7 +40,7 @@ export component AppWindow inherits Window {
                     
                     on-copy => { root.copy-item(item); }
                     on-edit => { root.edit-item(index, item); }
-                    on-delete => { root.delete-item(index); }
+                    on-delete => { root.delete-item(index, item); }
                     on-pin => { root.pin-item(index); }
                 }
             }

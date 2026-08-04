@@ -88,3 +88,23 @@ pub fn delete_item(conn: &Connection, content: &str) -> Result<()> {
     )?;
     Ok(())
 }
+
+pub fn search_texts(conn: &Connection, query: &str, limit: u32) -> Result<Vec<String>> {
+    let search_pattern = format!("%{}%", query);
+    
+    let mut stmt = conn.prepare(
+        "SELECT content FROM clipboard_history 
+         WHERE content_type = 'text' AND content IS NOT NULL AND content LIKE ?1 
+         ORDER BY created_at DESC 
+         LIMIT ?2"
+    )?;
+    
+    let rows = stmt.query_map(rusqlite::params![search_pattern, limit], |row| row.get(0))?;
+    
+    let mut items = Vec::new();
+    for item in rows {
+        items.push(item?);
+    }
+    
+    Ok(items)
+}

@@ -74,7 +74,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     });
-    
+
+    // Récupération d'un pointeur faible pour l'utiliser dans l'écouteur de recherche
+    let ui_handle_search = ui.as_weak();
+
+    // Événement : Déclenché à chaque modification du champ de recherche
+    let ui_handle_search = ui.as_weak();
+
+    // Événement : Déclenché à chaque frappe dans la barre de recherche
+    ui.on_search_changed(move |query| {
+        if let Some(ui_instance) = ui_handle_search.upgrade() {
+            if let Ok(conn) = db::init_db() {
+                // Si le champ est vide, on recharge les récents, sinon on filtre
+                let items = if query.is_empty() {
+                    db::get_recent_texts(&conn, 20).unwrap_or_default()
+                } else {
+                    db::search_texts(&conn, query.as_str(), 50).unwrap_or_default()
+                };
+
+                let slint_items: Vec<slint::SharedString> = items
+                    .into_iter()
+                    .map(|s| s.into())
+                    .collect();
+                
+                let history_model = Rc::new(VecModel::from(slint_items));
+                ui_instance.set_history(ModelRc::from(history_model));
+            }
+        }
+    });
+
     // Démarrage de la boucle principale de l'interface utilisateur (bloquante)
     ui.run()?;
     

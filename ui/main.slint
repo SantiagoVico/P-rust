@@ -1,40 +1,39 @@
 // ui/main.slint
 
 import { ScrollView } from "std-widgets.slint";
-// Importation de tes nouveaux composants
 import { ClipboardCard } from "clipboard_card.slint";
 import { SearchBar } from "search_bar.slint";
 
 export component AppWindow inherits Window {
     preferred-width: 450px;
     preferred-height: 650px;
-    title: "P-Rust";
+    title: "Paste Clone";
     
     background: @radial-gradient(circle, #352538 0%, #15151a 80%, #0d0d12 100%);
     
     in property <[string]> history;
     
-    // Fait le pont entre la barre de recherche enfant et le code Rust parent
-    out property <string> search-query <=> search-bar.search-query;
-    
     callback copy-item(string);
     callback delete-item(int, string);
     callback edit-item(int, string);
     callback pin-item(int); 
+    callback search-changed(string); 
     
     VerticalLayout {
         padding: 20px;
         spacing: 15px;
         
-        // Utilisation du composant SearchBar
-        search-bar := SearchBar {}
+        search-bar := SearchBar {
+            search-changed(text) => {
+                root.search-changed(text);
+            }
+        }
 
         ScrollView {
             VerticalLayout {
                 spacing: 15px;
                 alignment: start;
                 
-                // Utilisation du composant ClipboardCard
                 for item[index] in root.history : ClipboardCard {
                     text-content: item;
                     

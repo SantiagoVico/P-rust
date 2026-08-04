@@ -1,8 +1,8 @@
 // ui/search_bar.slint
 
 export component SearchBar inherits Rectangle {
-    // Expose le texte tapé au composant parent
-    out property <string> search-query <=> search-input.text;
+    // Déclaration du callback qui remontera le texte saisi
+    callback search-changed(string);
     
     height: 45px;
     background: #2a2a3599; 
@@ -40,6 +40,11 @@ export component SearchBar inherits Rectangle {
                 color: #e2e2e2;
                 font-size: 14px;
                 single-line: true;
+                
+                // Déclenché à chaque frappe clavier
+                edited => {
+                    root.search-changed(self.text);
+                }
             }
         }
     }

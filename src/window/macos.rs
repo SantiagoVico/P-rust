@@ -1,4 +1,4 @@
-use slint::{Weak, CloseRequestResponse};
+use slint::{Weak, CloseRequestResponse, ComponentHandle};
 use crate::AppWindow;
 use rdev::{listen, Event, EventType, Key};
 

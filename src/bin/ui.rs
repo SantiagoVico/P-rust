@@ -3,6 +3,8 @@ slint::include_modules!();
 use slint::{ModelRc, VecModel, ComponentHandle, CloseRequestResponse, Timer, TimerMode};
 use std::rc::Rc;
 use std::time::Duration;
+use std::net::TcpListener;
+use std::io::Read;
 
 #[path = "../db.rs"]
 mod db;
@@ -20,6 +22,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let _ = ui.window().hide();
         }
         CloseRequestResponse::HideWindow
+    });
+
+    // Serveur IPC local pour réveiller la fenêtre existante au premier plan (évite les doublons)
+    let ui_handle_ipc = ui.as_weak();
+    std::thread::spawn(move || {
+        if let Ok(listener) = TcpListener::bind("127.0.0.1:48292") {
+            for stream in listener.incoming() {
+                if let Ok(mut s) = stream {
+                    let mut buf = [0; 64];
+                    let _ = s.read(&mut buf);
+                    
+                    // On clone la référence pour chaque itération de la boucle
+                    let ui_clone = ui_handle_ipc.clone();
+                    let _ = slint::invoke_from_event_loop(move || {
+                        if let Some(ui) = ui_clone.upgrade() {
+                            let _ = ui.window().show();
+                        }
+                    });
+                }
+            }
+        }
     });
 
     // Chargement initial

@@ -5,6 +5,8 @@ use rdev::{listen, Event, EventType, Key};
 use std::thread;
 use std::time::Duration;
 use std::process::Command;
+use std::net::TcpStream;
+use std::io::Write;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Enregistrement automatique au démarrage
@@ -84,11 +86,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             EventType::KeyPress(Key::KeyV) => {
                 if meta_pressed && shift_pressed {
-                    if let Ok(current_exe) = std::env::current_exe() {
-                        if let Some(dir) = current_exe.parent() {
-                            let ui_binary = dir.join("p-rust-ui");
-                            // Lance l'interface graphique en mode détaché
-                            let _ = Command::new(ui_binary).spawn();
+                    // On essaie de contacter l'UI existante via TCP
+                    if let Ok(mut stream) = TcpStream::connect("127.0.0.1:48292") {
+                        let _ = stream.write_all(b"show");
+                    } else {
+                        // Si l'UI ne tourne pas, on la lance
+                        if let Ok(current_exe) = std::env::current_exe() {
+                            if let Some(dir) = current_exe.parent() {
+                                let ui_binary = dir.join("p-rust-ui");
+                                let _ = Command::new(ui_binary).spawn();
+                            }
                         }
                     }
                 }

@@ -3,8 +3,14 @@ import { ClipboardCard } from "clipboard_card.slint";
 import { SearchBar } from "search_bar.slint";
 
 export component AppWindow inherits Window {
+    // Tailles de départ idéales, mais la fenêtre redevient redimensionnable
     preferred-width: 450px;
     preferred-height: 650px;
+    
+    // Limites de réduction pour éviter que l'UI ne se casse si on réduit trop
+    min-width: 350px;
+    min-height: 450px;
+    
     title: "P-Rust";
     
     background: @radial-gradient(circle, #352538 0%, #15151a 80%, #0d0d12 100%);
@@ -20,17 +26,23 @@ export component AppWindow inherits Window {
         spacing: 15px;
         
         search-bar := SearchBar {
+            width: 100%;
             search-changed(text) => {
                 root.search-changed(text);
             }
         }
 
         ScrollView {
+            width: 100%;
+            vertical-stretch: 1; 
+            
             VerticalLayout {
+                width: 100%;
                 spacing: 15px;
                 alignment: start;
                 
                 for item[index] in root.history : ClipboardCard {
+                    width: 100%;
                     text-content: item;
                     
                     on-copy => { root.copy-item(item); }
